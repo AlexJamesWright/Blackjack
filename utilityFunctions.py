@@ -41,9 +41,13 @@ def isSoft(hand):
     return False
 
 def canSplit(hand):
-    if len(hand.cards) > 2:
-        return False
-    elif getNumber(hand.cards[0]) == getNumber(hand.cards[1]):
+    if len(hand.cards) == 2 and \
+                    (getNumber(hand.cards[0]) == getNumber(hand.cards[1])):
+        return True
+    return False
+
+def canDoubleDown(hand):
+    if len(hand.cards) == 2:
         return True
     return False
 

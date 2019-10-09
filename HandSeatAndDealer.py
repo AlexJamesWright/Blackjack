@@ -28,17 +28,12 @@ class Hand(object):
     def addCard(self, card):
         self.cards.append(card)
         
-    def split(self):
-        if ut.canSplit(self):
-            pass
-        else:
-            raise RuntimeError(f'Can not split this hand: {self.cards}')
-    
     def doubleDown(self, shoe):
         # Ahhhh, how to change the bet size....
-        self.bet *= 2
-        self.hit(shoe)
-        self.stick()
+        if ut.canDoubleDown(self):
+            self.bet *= 2
+            self.hit(shoe)
+            self.stick()
     
     def hit(self, shoe):
         self.addCard(shoe.nextCard())
@@ -54,8 +49,11 @@ class Seat(object):
     """
     
     def __init__(self):
-        self.hands = []
         self.player = None
+        self.hands = []
+        
+    def resetSeat(self):
+        self.hands = []
     
     def newBet(self, bet):
         if bet <= self.player.bank:
@@ -115,6 +113,12 @@ class Hitter(Player):
         while ut.isNotStuckOrBust(hand):
             # Always hit
             hand.hit(shoe)
+        
+    def wantsToSplit(self, hand):
+        return True
+    
+    def wantsToDoubleDown(self, hand):
+        return True
         
 class Sticker(Player):
     """

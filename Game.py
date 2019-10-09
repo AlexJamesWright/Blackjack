@@ -40,14 +40,23 @@ class Game(object):
             self.table.seats[seatNo] = Seat()
         
     def play(self):
+        # Play the game until the end of the shoe
+#        print("Forcing the shoe for the player")
+#        self.table.shoe.cards[0] = 'Ah'
+#        self.table.shoe.cards[2] = 'Ac'
         while None in self.table.shoe.cards:
             self.nextRound()
             
-            # Force only one round for nowgam
+            # Force only one round for now
             break
     
+    def cleanSeats(self):
+        # Clear all seats of their hands
+        for seat in self.table.seats:
+            seat.resetSeat()
+    
     def getBets(self):
-        
+        # Get the bets from the seats
         for i, seat in enumerate(self.table.seats):
             if seat.player:
                 # For now just hard code a few hands
@@ -76,8 +85,10 @@ class Game(object):
         """
         
         #### I think that the seat action should be determined in the 
-        # Table calss, as this can pass the output of shoe.nextCard to any
+        # Table class, as this can pass the output of shoe.nextCard to any
         # hit/double functions returned by a players rules
+    
+        self.table.playerActions()
     
     def dealerAction(self):
         """
@@ -94,7 +105,7 @@ class Game(object):
     
     def nextRound(self):
         # Need to initialise some new bets/hands
-        
+        self.cleanSeats()
         self.getBets()
         self.deal()
         self.seatAction()
@@ -128,14 +139,11 @@ class Game(object):
         
 if __name__ == '__main__':
     
-    # Lets created two players and start a game
+    # Lets create two players and start a game
     player1 = Hitter(1000)
     player2 = Sticker(8000)
     
     game = Game()
     game.addPlayerToSeat(player1, 0)
-    game.addPlayerToSeat(player1, 1)
-    game.addPlayerToSeat(player2, 3)
-    game.addPlayerToSeat(player2, 5)
     game.play()
     game.showHands()

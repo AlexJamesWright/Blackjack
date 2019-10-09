@@ -10,6 +10,7 @@ Table class
 
 from DeckAndShoe import Shoe
 from HandSeatAndDealer import Seat, Dealer
+import utilityFunctions as ut
 
 class Table(object):
     """
@@ -42,4 +43,25 @@ class Table(object):
         
     def newSeat(self):
         self.seats.append(Seat())
+        
+    def playerActions(self):
+        for seat in self.seats:
+            for hand in seat.hands:
+                # Start of hand, deal with doubling and splitting firest
+                if len(hand.cards) == 1:
+                    # Player must have split so take another card
+                    print("Dealing second card after split")
+                    hand.cards.append(self.shoe.nextCard())
+                if len(seat.hands) == 1 and ut.canSplit(hand) and seat.player.wantsToSplit(hand) and seat.player.bank >= hand.bet:
+                    print("Splitting hand")
+                    seat.newBet(hand.bet)
+                    seat.hands[1].cards.append(hand.cards[1])
+                    hand.cards.remove(hand.cards[1])
+                    hand.cards.append(self.shoe.nextCard())
+                if ut.canDoubleDown(hand) and seat.player.wantsToDoubleDown(hand):
+                    print("Doubling down")
+                    hand.doubleDown(self.shoe)
+                while not hand.stuck:
+                    print("Playing hand normally")
+                    seat.player.playHand(hand)
         
