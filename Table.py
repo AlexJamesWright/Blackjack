@@ -39,32 +39,37 @@ class Table(object):
                 self.newSeat()
         
     def newShoe(self):
+        """
+        Generate a new shoe.
+        """
         self.shoe = Shoe()
         
     def newSeat(self):
+        """
+        Add a new seat to the table.
+        """
         self.seats.append(Seat())
         
     def playerActions(self):
+        """
+        Go round the table and perform all player actions.
+        """
         for seat in self.seats:
             for hand in seat.hands:
                 # Start of hand, deal with doubling and splitting firest
                 if len(hand.cards) == 1:
                     # Player must have split so take another card
-                    print("Dealing second card after split")
                     hand.cards.append(self.shoe.nextCard())
                 elif len(seat.hands) == 1 and ut.canSplit(hand) and seat.player.wantsToSplit(hand) and seat.player.bank >= hand.bet:
-                    print("Splitting hand")
                     seat.newBet(hand.bet)
                     seat.hands[1].cards.append(hand.cards[1])
                     hand.cards.remove(hand.cards[1])
                     hand.cards.append(self.shoe.nextCard())
                 elif ut.canDoubleDown(hand) and seat.player.wantsToDoubleDown(hand) and seat.player.bank >= hand.bet:
-                    print("Doubling down")
                     seat.player.bank -= hand.bet
                     hand.doubleDown(self.shoe)
                 # Special actions have been delt with, now play normally
                 while ut.canBePlayed(hand):
-                    print("Playing hand normally")
                     if seat.player.wantsToHit(hand):
                         hand.hit(self.shoe)
                     else:
@@ -72,13 +77,18 @@ class Table(object):
                     
                     
     def cleanSeats(self):
-        # Clear all seats of their hands
+        """
+        Delete all hands.
+        """
         for seat in self.seats:
             seat.resetSeat()
         self.dealer.resetHand()
         
         
     def getBets(self):
+        """
+        Go around the table requesting bets from the players/
+        """
         # Get the bets from the seats
         for seat in self.seats:
             if seat.player:
@@ -86,6 +96,9 @@ class Table(object):
                 seat.newBet(seat.player.getBet()) 
         
     def deal(self):
+        """
+        Go round the table dealing cards to the players and dealer.
+        """
         # Hand out two cards to each player and the dealer
         # First card
         for seat in self.seats:
@@ -107,7 +120,6 @@ class Table(object):
         """
         Dealer plays until theys stick or bust.
         """
-        
         self.dealer.playHand(self.dealer.hand, self.shoe)
         
     def settleUp(self):
@@ -116,23 +128,20 @@ class Table(object):
         """
         for seat in self.seats:
             for hand in seat.hands:
-                print("current bank: ", seat.player.bank)
                 # Only pay out if player isnt bust
                 if ut.isNotBust(hand):
                     # Payout 1.5x if player got blackjack
                     if ut.isBlackjack(hand):
-                        print("pay1")
                         seat.player.bank += hand.bet*2.5
                     # Pay out if dealer busts
                     elif ut.isBust(self.dealer.hand):
-                        print("pay2")
                         seat.player.bank += hand.bet*2
                     # Pay out if higher score than dealer
-                    elif ut.getTotal(hand) > self.dealer.total():
-                        print("pay3")
+                    elif ut.getTotal(hand) > self.dealer.fullTotal():
+                        print("payout 3")
                         seat.player.bank += hand.bet*2
                     # Push
-                    elif ut.getTotal(hand) == self.dealer.total():
-                        print("pay4")
+                    elif ut.getTotal(hand) == self.dealer.fullTotal():
+                        print("payout 4")
                         seat.player.bank += hand.bet
         

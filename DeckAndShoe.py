@@ -11,6 +11,9 @@ Stuff involving cards
 import random
 
 class Deck(object):
+    """
+    A single deck of cards.
+    """
     
     def __init__(self):
         
@@ -20,8 +23,16 @@ class Deck(object):
         # Because maybe this will be usefull?
         self.originalCards = self.cards.copy()
 
+
 class Shoe(object):
+    """
+    A single shoe, containing multiple decks.
     
+    Parameters 
+    ----------
+    numberOfDecks : int 
+        Number of decks to use in this shoe
+    """
     def __init__(self, numberOfDecks=6):
         
         self.decks = []
@@ -36,6 +47,14 @@ class Shoe(object):
         random.shuffle(self.cards)
         
     def penetrate(self, position):
+        """
+        Penetrate the deck with the None card.
+        
+        Parameters
+        ----------
+        position : int
+            Card number at which to penetrate deck 
+        """
         self.penPosition = position
         lastCard = self.cards[-1]
         self.cards[position+1:] = self.cards[position:-1]
@@ -43,6 +62,15 @@ class Shoe(object):
         self.cards.append(lastCard)
         
     def nextCard(self):
+        """
+        Used everytime a card is requested. This removes the card at index 0, 
+        returns is, and shifts all cards forward by one.
+        
+        Returns
+        -------
+        card : str
+            String defining the next card out the shoe
+        """
         card = self.cards[0]
         self.cards = self.cards[1:]
         if card is not None:

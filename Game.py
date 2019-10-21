@@ -14,8 +14,16 @@ class Game(object):
     Overarching class describing the game. Contains the table (with its seats, 
     shoe etc), and contains methods for the game to be played.
     
+    Parameters
+    ----------
     numberOfSeats : int
-        Number of seats
+        Number of seats at table
+        
+    randomPen : bool
+        Do we want to randomly penetrate the deck?
+        
+    penPosition : int
+        Position to penetrate the deck
     """
     
     def __init__(self, numberOfSeats=6, randomPen=False, penPosition=250):
@@ -32,15 +40,36 @@ class Game(object):
         
         
     def addPlayerToSeat(self, player, seatNo):
+        """
+        Add a given player to a specified seat.
+        
+        Parameters
+        ----------
+        player : Player object
+            Player to add to the seat
+        
+        seatNo : int
+            Seat number player wants to sit at (index from 0)
+        """
         if seatNo < self.table.numberOfSeats:
             self.table.seats[seatNo].addPlayer(player)
             
-    def removePlayerFromSeat(self, player, seatNo):
+    def removePlayerFromSeat(self, seatNo):
+        """
+        Removes a player from a seat.
+        
+        Parameters
+        ----------
+        seatNo : int
+            Seat number to remove player from (index from 0)
+        """
         if seatNo < self.seats:
             self.table.seats[seatNo] = Seat()
         
     def play(self):
-        # Play the game until the end of the shoe
+        """
+        Play blackjack until the end of the shoe.
+        """
 #        print("Forcing the shoe for the player")
 #        self.table.shoe.cards = 'Ah'
 #        self.table.shoe.cards = 'Ac'
@@ -48,10 +77,13 @@ class Game(object):
             self.nextRound()
             
             # Force only one round for now
-            break
+#            break
     
     
     def nextRound(self):
+        """
+        Play the next round of blakjack
+        """
         # Need to initialise some new bets/hands
         self.table.cleanSeats()
         self.table.getBets()
@@ -59,6 +91,7 @@ class Game(object):
         self.table.playerActions()
         self.table.dealerAction()
         self.table.settleUp()
+        self.showHands()
         
         
     ###########################################################################
@@ -66,6 +99,9 @@ class Game(object):
     ###########################################################################
     
     def showHands(self):
+        """
+        Print the current hand at the table.
+        """
         dstr = ''
         for n, card in enumerate(self.table.dealer.hand.cards):
             dstr += '{:3}'.format(card)
@@ -80,11 +116,21 @@ class Game(object):
                     if n < len(hand.cards)-1:
                         hstr += ' '
                 print("Seat {}.{} :   {:2d} [{}]".format(s, h, ut.getTotal(hand), hstr))
-                
+        
         for player in self.getPlayers():
-            print("{}: bank = {}".format(player.__class__, player.bank))  
+            print("{}: bank = {}".format(player.__name__, player.bank))
+                
                 
     def getPlayers(self):
+        """
+        Get all the players current at the table.
+        
+        Returns
+        -------
+        player : list
+            A list of all Player objects at the table
+        
+        """
         players = []
         for seat in self.table.seats:
             if seat.player not in players and seat.player is not None:
@@ -100,7 +146,7 @@ if __name__ == '__main__':
     player2 = Sticker(8000)
     
     game = Game()
-    game.addPlayerToSeat(player1, 0)
+#    game.addPlayerToSeat(player1, 0)
     game.addPlayerToSeat(player2, 3)
     game.play()
     game.showHands()
