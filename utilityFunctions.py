@@ -29,9 +29,23 @@ def getTotal(hand):
         tot -= 10
     return tot
 
-def isNotStuckOrBust(hand):
-    if getTotal(hand) <= 21 and not hand.stuck:
+def isNotBust(hand):
+    return getTotal(hand) <= 21
+
+def isBust(hand):
+    return getTotal(hand) > 21
+
+def canBePlayed(hand):
+    """
+    Can this hand be played? Checks that hand is not bust, and less than 21.
+    If hand is 21, the hand is automatically stuck.
+    """
+    if hand.stuck:
+        return False
+    elif getTotal(hand) <= 20:
         return True
+    # Either the player has 21 or bust, so auto-stick
+    hand.stick()
     return False
 
 def isSoft(hand):

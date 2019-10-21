@@ -6,7 +6,7 @@ try to replicate how it is played in casinos.
 """
 
 from Table import Table
-from HandSeatAndDealer import Hitter, Sticker, Seat
+from HandSeatAndDealer import Mug, Sticker, Seat
 import utilityFunctions as ut
 
 class Game(object):
@@ -42,75 +42,23 @@ class Game(object):
     def play(self):
         # Play the game until the end of the shoe
 #        print("Forcing the shoe for the player")
-#        self.table.shoe.cards[0] = 'Ah'
-#        self.table.shoe.cards[2] = 'Ac'
+#        self.table.shoe.cards = 'Ah'
+#        self.table.shoe.cards = 'Ac'
         while None in self.table.shoe.cards:
             self.nextRound()
             
             # Force only one round for now
             break
     
-    def cleanSeats(self):
-        # Clear all seats of their hands
-        for seat in self.table.seats:
-            seat.resetSeat()
-    
-    def getBets(self):
-        # Get the bets from the seats
-        for i, seat in enumerate(self.table.seats):
-            if seat.player:
-                # For now just hard code a few hands
-                seat.newBet(i*10) 
-        
-    def deal(self):
-        # Hand out two cards to each player and the dealer
-        # First card
-        for seat in self.table.seats:
-            if seat.player:
-                for hand in seat.hands:
-                    hand.addCard(self.table.shoe.nextCard())
-        # Dealers first
-        self.table.dealer.hand.addCard(self.table.shoe.nextCard())
-        # Second card
-        for seat in self.table.seats:
-            if seat.player:
-                for hand in seat.hands:
-                    hand.addCard(self.table.shoe.nextCard())
-        # Dealers second
-        self.table.dealer.hand.addCard(self.table.shoe.nextCard())
-
-    def seatAction(self):
-        """
-        All seats have their go until they either stick or bust.
-        """
-        
-        #### I think that the seat action should be determined in the 
-        # Table class, as this can pass the output of shoe.nextCard to any
-        # hit/double functions returned by a players rules
-    
-        self.table.playerActions()
-    
-    def dealerAction(self):
-        """
-        Dealer plays until theys stick or bust.
-        """
-        
-        self.table.dealer.playHand(self.table.dealer.hand, self.table.shoe)
-    
-    def settleUp(self):
-        """
-        Casino pays out winning hands.
-        """
-        pass
     
     def nextRound(self):
         # Need to initialise some new bets/hands
-        self.cleanSeats()
-        self.getBets()
-        self.deal()
-        self.seatAction()
-        self.dealerAction()
-        self.settleUp()
+        self.table.cleanSeats()
+        self.table.getBets()
+        self.table.deal()
+        self.table.playerActions()
+        self.table.dealerAction()
+        self.table.settleUp()
         
         
     ###########################################################################
@@ -133,17 +81,26 @@ class Game(object):
                         hstr += ' '
                 print("Seat {}.{} :   {:2d} [{}]".format(s, h, ut.getTotal(hand), hstr))
                 
+        for player in self.getPlayers():
+            print("{}: bank = {}".format(player.__class__, player.bank))  
                 
+    def getPlayers(self):
+        players = []
+        for seat in self.table.seats:
+            if seat.player not in players and seat.player is not None:
+                players.append(seat.player)
+        return players
     
         
         
 if __name__ == '__main__':
     
     # Lets create two players and start a game
-    player1 = Hitter(1000)
+    player1 = Mug(1000)
     player2 = Sticker(8000)
     
     game = Game()
     game.addPlayerToSeat(player1, 0)
+    game.addPlayerToSeat(player2, 3)
     game.play()
     game.showHands()

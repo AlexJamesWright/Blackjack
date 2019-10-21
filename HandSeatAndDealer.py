@@ -29,11 +29,12 @@ class Hand(object):
         self.cards.append(card)
         
     def doubleDown(self, shoe):
-        # Ahhhh, how to change the bet size....
-        if ut.canDoubleDown(self):
-            self.bet *= 2
-            self.hit(shoe)
-            self.stick()
+        """
+        Double down, only take one more card
+        """
+        self.bet *= 2
+        self.hit(shoe)
+        self.stick()
     
     def hit(self, shoe):
         self.addCard(shoe.nextCard())
@@ -56,7 +57,7 @@ class Seat(object):
         self.hands = []
     
     def newBet(self, bet):
-        if bet <= self.player.bank:
+        if bet <= self.player.bank and bet > 0:
             self.hands.append(Hand(bet))
             self.player.bank -= bet
         
@@ -81,6 +82,12 @@ class Dealer(object):
         else:
             return False
     
+    def total(self):
+        return ut.getTotal(self.hand)
+        
+    def resetHand(self):
+        self.hand = Hand()
+    
     def playHand(self, hand, shoe):
         while self.shouldHit(hand):
             hand.hit(shoe)
@@ -101,18 +108,37 @@ class Player(object):
     def __init__(self, bank=1000):
         self.bank = bank
         
-    def playHand(self, hand, shoe=None):
-        raise NotImplementedError('Need to implement rules for this player')
+    def wantsToSplit(self, hand):
+        """
+        Does this player want to split?
+        """
+        raise NotImplementedError('Need to implement rules for this player: ', self.__class__)
+        
+    def wantsToDoubleDown(self, hand):
+        """
+        Does this player want to double down?
+        """
+        raise NotImplementedError('Need to implement rules for this player: ', self.__class__)
+        
+    def wantsToHit(self, hand, shoe):
+        """
+        Does this player want to hit?
+        """
+        raise NotImplementedError('Need to implement rules for this player: ', self.__class__)
         
         
-class Hitter(Player):
+    def getBet(self):
+        """
+        What size bet does this player want to make?
+        """
+        raise NotImplementedError('Need to implement getBet for this player: ', self.__class__)
+        
+class Mug(Player):
     """
-    Always hit. ALways. 'Till bust.
+    Always split, double or hit
     """
-    def playHand(self, hand, shoe=None):
-        while ut.isNotStuckOrBust(hand):
-            # Always hit
-            hand.hit(shoe)
+    def wantsToHit(self, hand):
+        return True
         
     def wantsToSplit(self, hand):
         return True
@@ -120,9 +146,22 @@ class Hitter(Player):
     def wantsToDoubleDown(self, hand):
         return True
         
+    def getBet(self):
+        return self.bank
+    
 class Sticker(Player):
     """
     Always stick.
     """
-    def playHand(self, hand, shoe=None):
-        hand.stick()
+    def wantsToSplit(self, hand):
+        return False
+    
+    def wantsToDoubleDown(self, hand):
+        return False
+        
+    def wantsToHit(self, hand):
+        return False
+    
+    def getBet(self):
+        return self.bank // 100
+    

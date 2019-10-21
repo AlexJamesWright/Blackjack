@@ -52,16 +52,87 @@ class Table(object):
                     # Player must have split so take another card
                     print("Dealing second card after split")
                     hand.cards.append(self.shoe.nextCard())
-                if len(seat.hands) == 1 and ut.canSplit(hand) and seat.player.wantsToSplit(hand) and seat.player.bank >= hand.bet:
+                elif len(seat.hands) == 1 and ut.canSplit(hand) and seat.player.wantsToSplit(hand) and seat.player.bank >= hand.bet:
                     print("Splitting hand")
                     seat.newBet(hand.bet)
                     seat.hands[1].cards.append(hand.cards[1])
                     hand.cards.remove(hand.cards[1])
                     hand.cards.append(self.shoe.nextCard())
-                if ut.canDoubleDown(hand) and seat.player.wantsToDoubleDown(hand):
+                elif ut.canDoubleDown(hand) and seat.player.wantsToDoubleDown(hand) and seat.player.bank >= hand.bet:
                     print("Doubling down")
+                    seat.player.bank -= hand.bet
                     hand.doubleDown(self.shoe)
-                while not hand.stuck:
+                # Special actions have been delt with, now play normally
+                while ut.canBePlayed(hand):
                     print("Playing hand normally")
-                    seat.player.playHand(hand)
+                    if seat.player.wantsToHit(hand):
+                        hand.hit(self.shoe)
+                    else:
+                        hand.stick()
+                    
+                    
+    def cleanSeats(self):
+        # Clear all seats of their hands
+        for seat in self.seats:
+            seat.resetSeat()
+        self.dealer.resetHand()
+        
+        
+    def getBets(self):
+        # Get the bets from the seats
+        for seat in self.seats:
+            if seat.player:
+                # Get players bet size
+                seat.newBet(seat.player.getBet()) 
+        
+    def deal(self):
+        # Hand out two cards to each player and the dealer
+        # First card
+        for seat in self.seats:
+            if seat.player:
+                for hand in seat.hands:
+                    hand.addCard(self.shoe.nextCard())
+        # Dealer's first
+        self.dealer.hand.addCard(self.shoe.nextCard())
+        # Second card
+        for seat in self.seats:
+            if seat.player:
+                for hand in seat.hands:
+                    hand.addCard(self.shoe.nextCard())
+        # Dealers second
+        self.dealer.hand.addCard(self.shoe.nextCard())
+        
+        
+    def dealerAction(self):
+        """
+        Dealer plays until theys stick or bust.
+        """
+        
+        self.dealer.playHand(self.dealer.hand, self.shoe)
+        
+    def settleUp(self):
+        """
+        Casino pays out winning hands.
+        """
+        for seat in self.seats:
+            for hand in seat.hands:
+                print("current bank: ", seat.player.bank)
+                # Only pay out if player isnt bust
+                if ut.isNotBust(hand):
+                    # Payout 1.5x if player got blackjack
+                    if ut.isBlackjack(hand):
+                        print("pay1")
+                        seat.player.bank += hand.bet*2.5
+                    # Pay out if dealer busts
+                    elif ut.isBust(self.dealer.hand):
+                        print("pay2")
+                        seat.player.bank += hand.bet*2
+                    # Pay out if higher score than dealer
+                    elif ut.getTotal(hand) > self.dealer.total():
+                        print("pay3")
+                        seat.player.bank += hand.bet*2
+                    # Push
+                    elif ut.getTotal(hand) == self.dealer.total():
+                        print("pay4")
+                        seat.player.bank += hand.bet
         

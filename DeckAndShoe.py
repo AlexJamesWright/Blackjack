@@ -43,8 +43,11 @@ class Shoe(object):
         self.cards.append(lastCard)
         
     def nextCard(self):
-        nextCard = self.cards[0]
+        card = self.cards[0]
         self.cards = self.cards[1:]
-        return nextCard
+        if card is not None:
+            return card
+        else:
+            return self.nextCard()
     
     
