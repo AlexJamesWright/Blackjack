@@ -6,6 +6,7 @@ Created on Thu Sep 19 18:43:23 2019
 @author: ajw1e16
 """
 import utilityFunctions as ut
+import numpy as np
 
 class Hand(object):
     """
@@ -93,7 +94,7 @@ class Seat(object):
         """
         if bet <= self.player.bank and bet > 0:
             self.hands.append(Hand(bet))
-            self.player.bank -= bet
+            self.player.roundBetting += bet
         
     def addPlayer(self, player):
         """
@@ -195,7 +196,42 @@ class Player(object):
         Total money player is bringing to the table.
     """
     def __init__(self, bank=1000):
+        
+        self.bankHistory = [bank]
         self.bank = bank
+        self.roundBetting = 0
+        self.payout = 0
+        
+    @property
+    def bank(self):
+        return self.__bank
+    
+    @bank.setter
+    def bank(self, bank):
+        self.__bank = bank
+        # Save to the history
+        self.bankHistory.append(self.bank)
+        
+    @property
+    def roundBetting(self):
+        return self.__roundBetting
+    
+    @roundBetting.setter
+    def roundBetting(self, amount):
+        self.__roundBetting = amount
+        
+    @property
+    def payout(self):
+        return self.__payout
+    
+    @payout.setter
+    def payout(self, amount):
+        self.__payout = amount
+        
+    def settleRound(self):
+        self.bank += self.payout - self.roundBetting
+        self.payout = 0
+        self.roundBetting = 0
         
     def wantsToSplit(self, hand):
         """
@@ -215,12 +251,12 @@ class Player(object):
         """
         raise NotImplementedError('Need to implement rules for this player: ', self.__class__)
         
-        
     def getBet(self):
         """
         What size bet does this player want to make?
         """
         raise NotImplementedError('Need to implement getBet for this player: ', self.__class__)
+        
         
 class Mug(Player):
     """
@@ -239,7 +275,8 @@ class Mug(Player):
         return True
         
     def getBet(self):
-        return self.bank
+        return 80
+    
     
 class Sticker(Player):
     """
@@ -247,7 +284,6 @@ class Sticker(Player):
     """
     
     __name__ = 'Pussy'
-    
     
     def wantsToSplit(self, hand):
         return False
@@ -259,5 +295,27 @@ class Sticker(Player):
         return False
     
     def getBet(self):
-        return self.bank // 100
+        return 80
     
+class Risker(Player):
+    """
+    Always split, double, and hit under 19
+    """
+    
+    __name__ = 'Risker'
+    
+    def wantsToHit(self, hand):
+        if ut.getTotal(hand) < 19:
+            return True
+        return False
+        
+    def wantsToSplit(self, hand):
+        return True
+    
+    def wantsToDoubleDown(self, hand):
+        if ut.getTotal(hand) < 12:
+            return True
+        return False
+        
+    def getBet(self):
+        return 80

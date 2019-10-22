@@ -6,7 +6,7 @@ try to replicate how it is played in casinos.
 """
 
 from Table import Table
-from HandSeatAndDealer import Mug, Sticker, Seat
+from HandSeatAndDealer import Seat
 import utilityFunctions as ut
 
 class Game(object):
@@ -66,33 +66,31 @@ class Game(object):
         if seatNo < self.seats:
             self.table.seats[seatNo] = Seat()
         
-    def play(self):
-        """
-        Play blackjack until the end of the shoe.
-        """
-#        print("Forcing the shoe for the player")
-#        self.table.shoe.cards = 'Ah'
-#        self.table.shoe.cards = 'Ac'
-        while None in self.table.shoe.cards:
-            self.nextRound()
-            
-            # Force only one round for now
-#            break
-    
-    
-    def nextRound(self):
-        """
-        Play the next round of blakjack
-        """
-        # Need to initialise some new bets/hands
-        self.table.cleanSeats()
-        self.table.getBets()
-        self.table.deal()
-        self.table.playerActions()
-        self.table.dealerAction()
-        self.table.settleUp()
-        self.showHands()
         
+    def play(self, numberOfShoes=1, showHands=False, showBanks=False):
+        """
+        Play blackjack for a number of shoes.
+        
+        Parameters
+        ----------
+        numberOfShoes : int
+            Number of shoes to played
+        """
+        
+        for n in range(numberOfShoes):
+            
+            while None in self.table.shoe.cards:
+                self.table.nextRound()
+                
+                # If wanted, print info
+                if showHands:
+                    self.showHands()
+                if showBanks:
+                    self.showPlayerBanks()
+                    
+                    
+            # Shoe has ended, start new shoe.
+            self.table.newShoe()
         
     ###########################################################################
     #### Useful functions that dont add to setting up the game or gameplay       
@@ -117,36 +115,11 @@ class Game(object):
                         hstr += ' '
                 print("Seat {}.{} :   {:2d} [{}]".format(s, h, ut.getTotal(hand), hstr))
         
-        for player in self.getPlayers():
+        
+    def showPlayerBanks(self):
+        for player in self.table.getPlayers():
             print("{}: bank = {}".format(player.__name__, player.bank))
                 
                 
-    def getPlayers(self):
-        """
-        Get all the players current at the table.
-        
-        Returns
-        -------
-        player : list
-            A list of all Player objects at the table
-        
-        """
-        players = []
-        for seat in self.table.seats:
-            if seat.player not in players and seat.player is not None:
-                players.append(seat.player)
-        return players
     
         
-        
-if __name__ == '__main__':
-    
-    # Lets create two players and start a game
-    player1 = Mug(1000)
-    player2 = Sticker(8000)
-    
-    game = Game()
-#    game.addPlayerToSeat(player1, 0)
-    game.addPlayerToSeat(player2, 3)
-    game.play()
-    game.showHands()
