@@ -5,6 +5,8 @@ Created on Tue Oct 22 21:13:17 2019
 
 @author: ajw1e16
 """
+import sys
+sys.path.append('../src')
 
 from Game import Game
 from HandSeatAndDealer import Sticker, Risker
@@ -21,12 +23,10 @@ if __name__ == '__main__':
     Nrealisations = 100
     for realisation in range(Nrealisations):
         # Lets create two players and start a game
-    #    mug = Mug(8000)
         sticker = Sticker(8000)
         risker = Risker(8000)
         
         game = Game()
-    #    game.addPlayerToSeat(mug, 0)
         game.addPlayerToSeat(sticker, 1)
         game.addPlayerToSeat(risker, 2)
         
@@ -35,7 +35,6 @@ if __name__ == '__main__':
         stickersHistory.append(np.asarray(sticker.bankHistory[:170]))
         riskersHistory.append(np.asarray(risker.bankHistory[:170]))
         
-    #    plt.plot(mug.bankHistory, label="Mug")
         plt.plot(sticker.bankHistory, color='blue', alpha=0.1)
         plt.plot(risker.bankHistory, color='orange', alpha=0.1)
         
