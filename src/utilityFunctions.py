@@ -220,4 +220,28 @@ def isBlackjack(hand):
         return True
     return False
 
+def handHas(hand, val):
+    """
+    Does this hand contain a card with the value val?
+    
+    Parameters
+    ----------
+    hand : Hand object
+        The hand we are looking at
+    val : int
+        The value card to check for
+        
+    Returns
+    -------
+    has : bool
+        Does this hand have val?
+    """
+    if (getNumber(hand.cards[0]) == val or
+        getNumber(hand.cards[1]) == val):
+        return True
+    return False
+    
+    
+    
+    
 

@@ -8,6 +8,7 @@ try to replicate how it is played in casinos.
 from Table import Table
 from HandSeatAndDealer import Seat
 import utilityFunctions as ut
+from Broadcast import Broadcast
 
 class Game(object):
     """
@@ -28,9 +29,9 @@ class Game(object):
     
     def __init__(self, numberOfSeats=6, randomPen=False, penPosition=250):
         
-        self.table = Table(numberOfSeats=numberOfSeats)
+        self.broadcast = Broadcast()
+        self.table = Table(self.broadcast, numberOfSeats=numberOfSeats)
         self.penPosition = penPosition
-        
         
         # Penetrate the deck
         if not randomPen:
@@ -41,7 +42,8 @@ class Game(object):
         
     def addPlayerToSeat(self, player, seatNo):
         """
-        Add a given player to a specified seat.
+        Add a given player to a specified seat, and show them a view of the
+        broadcast.
         
         Parameters
         ----------
@@ -52,6 +54,7 @@ class Game(object):
             Seat number player wants to sit at (index from 0)
         """
         if seatNo < self.table.numberOfSeats:
+            player.broadcast = self.broadcast
             self.table.seats[seatNo].addPlayer(player)
             
     def removePlayerFromSeat(self, seatNo):
@@ -122,4 +125,16 @@ class Game(object):
                 
                 
     
-        
+if __name__ == '__main__':
+    
+
+    from Players import Sticker, Risker
+    sticker = Sticker(8000)
+    risker = Risker(8000)
+    
+    game = Game()
+    game.addPlayerToSeat(sticker, 1)
+    game.addPlayerToSeat(risker, 2)
+    
+    game.play(numberOfShoes=1, showHands=True, showBanks=True)
+    

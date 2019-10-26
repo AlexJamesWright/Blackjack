@@ -18,6 +18,8 @@ class Table(object):
     
     Parameters
     ----------
+    broadcast : object
+        Broadcast object
     maxNumberOfSeats : int
         Maximum number of seats at the table.
     minBet : int
@@ -29,7 +31,8 @@ class Table(object):
     maxNumberOfSeats = 6
     
     
-    def __init__(self, numberOfSeats=6, minBet=1, maxBet=100):
+    def __init__(self, broadcast, numberOfSeats=6, minBet=1, maxBet=100):
+        self.broadcast = broadcast
         self.dealer = Dealer()
         self.seats = []
         self.numberOfSeats = numberOfSeats
@@ -44,7 +47,8 @@ class Table(object):
         """
         Generate a new shoe.
         """
-        self.shoe = Shoe()
+        self.broadcast.reset()
+        self.shoe = Shoe(self.broadcast)
         self.shoe.penetrate(penPosition)
         
         
@@ -120,6 +124,9 @@ class Table(object):
                     hand.addCard(self.shoe.nextCard())
         # Dealers second
         self.dealer.hand.addCard(self.shoe.nextCard())
+        
+        # Update the broadcast with dealers up card
+        self.broadcast.dealersTotal = self.dealer.total
         
         
     def dealerAction(self):

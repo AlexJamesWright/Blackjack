@@ -30,14 +30,17 @@ class Shoe(object):
     
     Parameters 
     ----------
+    broadcast : object
+        Broadcast object
     numberOfDecks : int 
         Number of decks to use in this shoe
     """
-    def __init__(self, numberOfDecks=6):
+    def __init__(self, broadcast, numberOfDecks=6):
         
         self.decks = []
         self.cards = []
         self.penPosition = None
+        self.broadcast = broadcast
         for i in range(numberOfDecks):
             self.decks.append(Deck())
             random.shuffle(self.decks[i].cards)
@@ -73,7 +76,9 @@ class Shoe(object):
         """
         card = self.cards[0]
         self.cards = self.cards[1:]
+        
         if card is not None:
+            self.broadcast.append(card)
             return card
         else:
             return self.nextCard()

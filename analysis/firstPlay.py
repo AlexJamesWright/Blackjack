@@ -9,7 +9,7 @@ import sys
 sys.path.append('../src')
 
 from Game import Game
-from HandSeatAndDealer import Sticker, Risker
+from Players import Sticker, Risker
 from matplotlib import pyplot as plt
 import numpy as np
         
