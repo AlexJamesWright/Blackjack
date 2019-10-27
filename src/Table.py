@@ -126,7 +126,7 @@ class Table(object):
         self.dealer.hand.addCard(self.shoe.nextCard())
         
         # Update the broadcast with dealers up card
-        self.broadcast.dealersTotal = self.dealer.total
+        self.broadcast.dealersTotal = self.dealer.total()
         
         
     def dealerAction(self):

@@ -44,7 +44,17 @@ class Player(object):
     
     @bank.setter
     def bank(self, bank):
+        """
+        Update the player's bank. When setting the player's bank at the end of 
+        a round, update the players bank history also.
+        
+        Parameters
+        ----------
+        bank : float
+            The new bank
+        """
         self.__bank = bank
+
         # Save to the history
         self.bankHistory.append(self.bank)
         
@@ -137,6 +147,7 @@ class Sticker(Player):
     def getBet(self):
         return 80
     
+    
 class Risker(Player):
     """
     Always split, double, and hit under 19.
@@ -160,6 +171,7 @@ class Risker(Player):
     def getBet(self):
         return 80
 
+
 class BasicStrategist(Player):
     """
     Play basic strategy.
@@ -182,76 +194,50 @@ class BasicStrategist(Player):
                 return True
         # 77
         elif ut.handHas(hand, 7):
-            if dealersTot > 7:
-                return False
-            else:
+            if dealersTot < 8:
                 return True
         # 66
         elif ut.handHas(hand, 6):
-            if dealersTot > 6:
-                return False
-            else:
+            if dealersTot < 7:
                 return True
         # 44
         elif ut.handHas(hand, 4):
             if dealersTot == 5 or dealersTot == 6:
                 return True
-            else:
-                return False
-        # 33
-        elif ut.handHas(hand, 3):
-            if dealersTot > 7:
-                return False
-            else:
-                return True
-        # 22
-        elif ut.handHas(hand, 2):
-            if dealersTot > 7:
-                return False
-            else:
+        # 33, 22
+        elif ut.handHas(hand, 3) or ut.handHas(hand, 2):
+            if dealersTot < 8:
                 return True
         return False
             
-    def wantsToDouble(self, hand):
+    def wantsToDoubleDown(self, hand):
         tot = ut.getTotal(hand)
         dealersTot = self.broadcast.dealersTotal
         
         # A
         if tot == 11:
-            if dealersTot == 11: 
-                return False
-            else:
+            if dealersTot != 11: 
                 return True
         # 10
         elif tot == 10:
-            if dealersTot > 9: 
-                return False
-            else:
+            if dealersTot < 10: 
                 return True
         elif tot == 9:
-            if dealersTot == 2 or dealersTot > 6:
-                return False
-            else:
+            if dealersTot > 2 or dealersTot < 7:
                 return True
         # Soft hands
         elif ut.isSoft(hand):
             # A7, A6
             if tot == 18 or tot == 17:
-                if dealersTot == 2 or dealersTot > 6:
-                    return False
-                else:
+                if dealersTot > 2 or dealersTot < 7:
                     return True
             # A5, A4
             elif tot == 16 or tot == 15:
-                if dealersTot < 4 or dealersTot > 6:
-                    return False
-                else:
+                if dealersTot > 3 or dealersTot < 7:
                     return True
             # A3, A2
             elif tot == 14 or tot == 13:
-                if dealersTot < 5 or dealersTot > 6:
-                    return False
-                else:
+                if dealersTot > 4 or dealersTot < 7:
                     return True
         return False
                 
@@ -259,28 +245,39 @@ class BasicStrategist(Player):
         tot = ut.getTotal(hand)
         dealersTot = self.broadcast.dealersTotal
         
-        # Dealer shows > 6
-        if dealersTot > 6:
-            if tot < 17:
-                if tot > 11:
+        # First deal with soft hands
+        if ut.isSoft(hand):
+            if tot == 18 and dealersTot > 8:
+                return True
+            elif tot > 12 and tot < 18:
+                return True
+        # Total < 17
+        if tot < 17:
+            # Dealer shows > 6
+            if dealersTot > 6:
+                return True
+            # Dealer shows < 6
+            else:
+                if tot == 12 and dealersTot < 4:
                     return True
-                elif tot == 11 and dealersTot == 11:
+                elif tot < 12:
                     return True
-                elif tot == 10:
-                    if dealersTot == 11 or dealersTot == 10:
-                        return True
-                    
-                    ## TODO!
-                    
-                    
-                    
         return False
+    
+    def getBet(self):
+        return 80
         
-                
-                
-                
-                
-                
+
+class Counter(BasicStrategist):
+    
+    __name__ = "Counter"
+    
+    def __init__(self, bank=1000, mult=5):
+        super().__init__(bank)
+        self.mult = mult
+    
+    def getBet(self):
+        return max(int(self.broadcast.trueHiLoCount() - 2) * self.mult * 80, 0)
                 
                 
             

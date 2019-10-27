@@ -9,7 +9,7 @@ import sys
 sys.path.append('../src')
 
 from Game import Game
-from Players import Sticker, Risker
+from Players import Sticker, BasicStrategist, Counter
 from matplotlib import pyplot as plt
 import numpy as np
         
@@ -17,35 +17,42 @@ if __name__ == '__main__':
     
     plt.figure()
     
-    stickersHistory = []
-    riskersHistory = []
+    playerClasses = [Sticker, BasicStrategist, Counter]
+    playerHistory = [[] for player in playerClasses]
+    playersMeans = []
+    colours = ['blue', 'green', 'red', 'orange', 'brown', 'pink']
     
     Nrealisations = 100
     for realisation in range(Nrealisations):
-        # Lets create two players and start a game
-        sticker = Sticker(8000)
-        risker = Risker(8000)
+        # Lets create the players 
+        players = [player(8000) for player in playerClasses]
         
+        # Create the game and add the players
         game = Game()
-        game.addPlayerToSeat(sticker, 1)
-        game.addPlayerToSeat(risker, 2)
+        for i, player in enumerate(players):
+            game.addPlayerToSeat(player, i+1)
         
+        # Play the game
         game.play(numberOfShoes=6, showHands=False, showBanks=False)
         
-        stickersHistory.append(np.asarray(sticker.bankHistory[:170]))
-        riskersHistory.append(np.asarray(risker.bankHistory[:170]))
+        # Store the history of each player's bank for this round
+        for i, player in enumerate(players):
+            playerHistory[i].append(np.asarray(player.bankHistory[:180]))
         
-        plt.plot(sticker.bankHistory, color='blue', alpha=0.1)
-        plt.plot(risker.bankHistory, color='orange', alpha=0.1)
+            plt.plot(player.bankHistory, color=colours[i], alpha=0.1)
         
-    stickerMean = np.asarray(stickersHistory).mean(axis=0)
-    riskerMean = np.asarray(riskersHistory).mean(axis=0)
-        
-    plt.plot(stickerMean, color='blue', linestyle='--', label='Sticker')
-    plt.plot(riskerMean, color='orange', linestyle='--', label='Risker')
+    for history in playerHistory:
+        playersMeans.append(np.asarray(history).mean(axis=0))
+    
+    for i, mean in enumerate(playersMeans):
+        plt.plot(mean, color=colours[i], linestyle='--', label=players[i].__name__)
+            
     plt.ylabel('Bank')
     plt.xlabel('Round')
-    plt.ylim(0, 10000)
+    plt.ylim(0, 12000)
     plt.legend(loc='lower left')
     plt.show()
+    
+    for i, player in enumerate(playerClasses):
+        print(f"{player.__name__}: mean bank = {playersMeans[i][-1]}")
         

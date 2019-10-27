@@ -19,8 +19,10 @@ class Broadcast(object):
     
     def __init__(self):
         self.shoeHistory = []
+        self.hiLoCountHistory = [0]
         self.hiLoCount = 0
         self.dealersTotal = 0
+        self.numberOfDeacks = None
         
     def reset(self):
         self.shoeHistory = []
@@ -41,7 +43,13 @@ class Broadcast(object):
             self.hiLoCount -= 1
         elif val < 7:
             self.hiLoCount += 1
-        print(self.hiLoCount)
+        self.hiLoCountHistory.append(self.hiLoCount)
+    
+    def trueHiLoCount(self):
+        """
+        Return the true HiLo count: hiLoCount / numberOfDecks
+        """
+        return self.hiLoCount / self.numberOfDecks
     
     def append(self, card):
         """
