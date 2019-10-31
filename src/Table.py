@@ -15,7 +15,7 @@ import utilityFunctions as ut
 class Table(object):
     """
     Physical table. Has seats, a dealer, and a shoe.
-    
+
     Parameters
     ----------
     broadcast : object
@@ -27,22 +27,22 @@ class Table(object):
     maxBet : int
         Maximum bet size
     """
-    
+
     maxNumberOfSeats = 6
-    
-    
+
+
     def __init__(self, broadcast, numberOfSeats=6, minBet=1, maxBet=100):
         self.broadcast = broadcast
         self.dealer = Dealer()
         self.seats = []
         self.numberOfSeats = numberOfSeats
         self.newShoe()
-        
+
         for i in range(self.numberOfSeats):
             if i < self.maxNumberOfSeats:
                 self.newSeat()
-        
-        
+
+
     def newShoe(self, penPosition=250):
         """
         Generate a new shoe.
@@ -50,15 +50,15 @@ class Table(object):
         self.broadcast.reset()
         self.shoe = Shoe(self.broadcast)
         self.shoe.penetrate(penPosition)
-        
-        
+
+
     def newSeat(self):
         """
         Add a new seat to the table.
         """
         self.seats.append(Seat())
-        
-        
+
+
     def playerActions(self):
         """
         Go round the table and perform all player actions.
@@ -83,8 +83,8 @@ class Table(object):
                         hand.hit(self.shoe)
                     else:
                         hand.stick()
-                    
-                    
+
+
     def cleanSeats(self):
         """
         Delete all hands.
@@ -92,8 +92,8 @@ class Table(object):
         for seat in self.seats:
             seat.resetSeat()
         self.dealer.resetHand()
-        
-        
+
+
     def getBets(self):
         """
         Go around the table requesting bets from the players/
@@ -102,9 +102,9 @@ class Table(object):
         for seat in self.seats:
             if seat.player:
                 # Get players bet size
-                seat.newBet(seat.player.getBet()) 
-        
-        
+                seat.newBet(seat.player.getBet())
+
+
     def deal(self):
         """
         Go round the table dealing cards to the players and dealer.
@@ -124,18 +124,18 @@ class Table(object):
                     hand.addCard(self.shoe.nextCard())
         # Dealers second
         self.dealer.hand.addCard(self.shoe.nextCard())
-        
+
         # Update the broadcast with dealers up card
         self.broadcast.dealersTotal = self.dealer.total()
-        
-        
+
+
     def dealerAction(self):
         """
         Dealer plays until theys stick or bust.
         """
         self.dealer.playHand(self.dealer.hand, self.shoe)
-        
-        
+
+
     def nextRound(self):
         """
         Play the next round of blakjack
@@ -147,23 +147,23 @@ class Table(object):
         self.playerActions()
         self.dealerAction()
         self.settleUp()
-    
+
     def getPlayers(self):
         """
         Get all the players current at the table.
-        
+
         Returns
         -------
         player : list
             A list of all Player objects at the table
-        
+
         """
         players = []
         for seat in self.seats:
             if seat.player not in players and seat.player is not None:
                 players.append(seat.player)
         return players
-        
+
     def settleUp(self):
         """
         Casino pays out winning hands.
@@ -174,7 +174,7 @@ class Table(object):
                 if ut.isNotBust(hand):
                     # Recall that bet has already been taken, so payouts must
                     # include this again. I.e. a push requires bank+=bet
-                    
+
                     # Payout 1.5x if player got blackjack
                     if ut.isBlackjack(hand):
                         seat.player.payout += hand.bet*2.5
@@ -187,6 +187,6 @@ class Table(object):
                     # Push, give bet back
                     elif ut.getTotal(hand) == self.dealer.fullTotal():
                         seat.player.payout += hand.bet
-                        
+
         for player in self.getPlayers():
             player.settleRound()

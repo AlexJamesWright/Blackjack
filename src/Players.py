@@ -14,40 +14,41 @@ class Player(object):
     """
     Base player. All other players will inherit from this with their own
     playing style.
-    
+
     Parameters
     ----------
-    
+
     bank : int
         Total money player is bringing to the table.
     """
     def __init__(self, bank=1000):
-        
+
         # History of this players bank
         self.bankHistory = []
-        
+
         # Current bank
         self.bank = bank
-        
+
         # How much have we bet in this round
         self.roundBetting = 0
-        
+
         # What is the payout in this round
         self.payout = 0
-        
+
         # A view of the broadcast
         self.broadcast = None
-        
+
+
     @property
     def bank(self):
         return self.__bank
-    
+
     @bank.setter
     def bank(self, bank):
         """
-        Update the player's bank. When setting the player's bank at the end of 
+        Update the player's bank. When setting the player's bank at the end of
         a round, update the players bank history also.
-        
+
         Parameters
         ----------
         bank : float
@@ -57,23 +58,23 @@ class Player(object):
 
         # Save to the history
         self.bankHistory.append(self.bank)
-        
+
     @property
     def roundBetting(self):
         return self.__roundBetting
-    
+
     @roundBetting.setter
     def roundBetting(self, amount):
         self.__roundBetting = amount
-        
+
     @property
     def payout(self):
         return self.__payout
-    
+
     @payout.setter
     def payout(self, amount):
         self.__payout = amount
-        
+
     def settleRound(self):
         """
         After a round has ended, settle up outstanding bets.
@@ -81,93 +82,93 @@ class Player(object):
         self.bank += self.payout - self.roundBetting
         self.payout = 0
         self.roundBetting = 0
-        
+
     def wantsToSplit(self, hand):
         """
-        Does this player want to split? If this method has been called, Table 
+        Does this player want to split? If this method has been called, Table
         has already checked that 'hand' can be split.
         """
         raise NotImplementedError('Need to implement rules for this player: ', self.__class__)
-        
+
     def wantsToDoubleDown(self, hand):
         """
         Does this player want to double down?
         """
         raise NotImplementedError('Need to implement rules for this player: ', self.__class__)
-        
+
     def wantsToHit(self, hand, shoe):
         """
         Does this player want to hit?
         """
         raise NotImplementedError('Need to implement rules for this player: ', self.__class__)
-        
+
     def getBet(self):
         """
         What size bet does this player want to make?
         """
         raise NotImplementedError('Need to implement getBet for this player: ', self.__class__)
-        
-        
+
+
 class Mug(Player):
     """
     Always split, double or hit.
     """
-    
+
     __name__ = 'Mug'
-    
+
     def wantsToHit(self, hand):
         return True
-        
+
     def wantsToSplit(self, hand):
         return True
-    
+
     def wantsToDoubleDown(self, hand):
         return True
-        
+
     def getBet(self):
         return 80
-    
-    
+
+
 class Sticker(Player):
     """
     Always stick.
     """
-    
+
     __name__ = 'Pussy'
-    
+
     def wantsToSplit(self, hand):
         return False
-    
+
     def wantsToDoubleDown(self, hand):
         return False
-        
+
     def wantsToHit(self, hand):
         return False
-    
+
     def getBet(self):
         return 80
-    
-    
+
+
 class Risker(Player):
     """
     Always split, double, and hit under 19.
     """
-    
+
     __name__ = 'Risker'
-    
+
     def wantsToHit(self, hand):
         if ut.getTotal(hand) < 19:
             return True
         return False
-        
+
     def wantsToSplit(self, hand):
         return True
-    
+
     def wantsToDoubleDown(self, hand):
         if ut.getTotal(hand) < 12:
             return True
         return False
-        
+
     def getBet(self):
         return 80
 
@@ -176,13 +177,13 @@ class BasicStrategist(Player):
     """
     Play basic strategy.
     """
-    
+
     __name__ = "BasicStrategist"
-    
+
     def wantsToSplit(self, hand):
-        
+
         dealersTot = self.broadcast.dealersTotal
-        
+
         # AA, 88
         if ut.handHas(hand, 11) or ut.handHas(hand, 8):
             return True
@@ -209,18 +210,18 @@ class BasicStrategist(Player):
             if dealersTot < 8:
                 return True
         return False
-            
+
     def wantsToDoubleDown(self, hand):
         tot = ut.getTotal(hand)
         dealersTot = self.broadcast.dealersTotal
-        
+
         # A
         if tot == 11:
-            if dealersTot != 11: 
+            if dealersTot != 11:
                 return True
         # 10
         elif tot == 10:
-            if dealersTot < 10: 
+            if dealersTot < 10:
                 return True
         elif tot == 9:
             if dealersTot > 2 or dealersTot < 7:
@@ -240,11 +241,11 @@ class BasicStrategist(Player):
                 if dealersTot > 4 or dealersTot < 7:
                     return True
         return False
-                
+
     def wantsToHit(self, hand):
         tot = ut.getTotal(hand)
         dealersTot = self.broadcast.dealersTotal
-        
+
         # First deal with soft hands
         if ut.isSoft(hand):
             if tot == 18 and dealersTot > 8:
@@ -263,42 +264,41 @@ class BasicStrategist(Player):
                 elif tot < 12:
                     return True
         return False
-    
+
     def getBet(self):
         return 80
-        
+
 
 class Counter(BasicStrategist):
-    
+
     __name__ = "Counter"
-    
+
     def __init__(self, bank=1000, mult=5):
         super().__init__(bank)
         self.mult = mult
-    
+
     def getBet(self):
-        return max(int(self.broadcast.trueHiLoCount() - 2) * self.mult * 80, 0)
-                
-                
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-               
-            
-            
-    
-    
-    
-    
-    
+        return min(max(int(self.broadcast.trueHiLoCount() - 2) * self.mult * 80, 80), 3*self.mult*80)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
