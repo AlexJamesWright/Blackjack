@@ -22,10 +22,10 @@ if __name__ == '__main__':
     colours = ['blue', 'green', 'red', 'orange', 'brown', 'pink']
 
     # How many times to run the experiment
-    Nrealisations = 10
+    Nrealisations = 100
 
     # How many shoes to play in each experiment
-    Nshoes = 3000
+    Nshoes = 400
 
     # How much should the players start with
     startingBank = 80000
@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
     # A list (later a numpy array) of the histories of each player
     # shape = (Nplayers, Nrealisations, Nrounds)
-    playerHistory = np.zeros((len(playerClasses), Nrealisations, Nshoes*52*6//2))
+    playerHistory = np.zeros((len(playerClasses), Nrealisations, Nshoes*52*6//len(playerClasses)))
 
     # The mean of each players bank at this round
     playersMeans = np.zeros((len(playerClasses), Nshoes*52*6//2))
@@ -61,7 +61,7 @@ if __name__ == '__main__':
         # Play the game
         startTime = time()
         game.play(numberOfShoes=Nshoes, showHands=False, showBanks=False)
-        print(f"One game took {time() - startTime}")
+        print(f"Game {realisation+1}/{Nrealisations} took {time() - startTime}")
         # Set the minimum/maximum number of rounds played so far
         thisRounds = len(players[0].bankHistory)
         minRounds = min(minRounds, thisRounds)
@@ -70,20 +70,26 @@ if __name__ == '__main__':
         # Store the history of each player's bank for this round
         for i, player in enumerate(players):
             playerHistory[i, realisation, :thisRounds] = np.asarray(player.bankHistory)
+            
+            plt.plot(player.bankHistory, color=colours[i], alpha=Nrealisations**-0.7)
 
-            plt.plot(player.bankHistory, color=colours[i], alpha=0.1)
+            # Plot where the player busts
+            if np.min(playerHistory[i, realisation, :thisRounds]) < 1e-5:
+                xpos = np.argmin(playerHistory[i, realisation, :thisRounds])                
+                print(f"Player {i} bust! Min : {np.min(playerHistory[i, realisation, :thisRounds])} at {xpos}")
+                plt.plot(xpos, 0, color=colours[i], marker='o')
 
     for i, history in enumerate(playerHistory):
         playersMeans[i, :minRounds] = history[:, :minRounds].mean(axis=0)
-
     for i, mean in enumerate(playersMeans):
         plt.plot(mean[:minRounds], color=colours[i], linestyle='--', label=players[i].__name__)
 
-    plt.ylabel('Bank')
-    plt.xlabel('Round')
-    plt.ylim(0, 1.5*startingBank)
-    plt.legend(loc='lower left')
+    plt.ylabel(r'$Bank$')
+    plt.xlabel(r'$Round$')
+    plt.ylim(0, 1.2*np.max(mean[:minRounds]))
+    plt.xlim(0, minRounds)
+    plt.legend(loc='upper left')
     plt.show()
 
     for i, player in enumerate(playerClasses):
-        print(f"{player.__name__}: mean bank = {playersMeans[i][minRounds-1]}")
+        print(f"{player.__name__:20s}: mean bank = {playersMeans[i][minRounds-1]:.2f}")

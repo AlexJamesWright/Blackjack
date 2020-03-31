@@ -141,13 +141,13 @@ def isSoft(hand):
         Is this hand soft?
     """
     for card in hand.cards:
-        if getNumber(card) is 11:
+        if getNumber(card) == 11:
             return True
     return False
 
 def canSplit(hand):
     """
-    Is this hand splittable?
+    Is this hand splittable (in terms of cards, not bank)?
     
     Parameters 
     ----------
@@ -166,7 +166,7 @@ def canSplit(hand):
 
 def canDoubleDown(hand):
     """
-    Is this hand doubleable?
+    Is this hand doubleable (in terms of cards, not bank)?
     
     Parameters 
     ----------

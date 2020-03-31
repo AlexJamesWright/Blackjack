@@ -69,12 +69,12 @@ class Table(object):
                 if len(hand.cards) == 1:
                     # Player must have split so take another card
                     hand.cards.append(self.shoe.nextCard())
-                elif len(seat.hands) == 1 and ut.canSplit(hand) and seat.player.wantsToSplit(hand) and seat.player.bank >= hand.bet:
+                elif len(seat.hands) == 1 and ut.canSplit(hand) and seat.player.wantsToSplit(hand) and seat.player.bank >= 2*hand.bet:
                     seat.newBet(hand.bet)
                     seat.hands[1].cards.append(hand.cards[1])
                     hand.cards.remove(hand.cards[1])
                     hand.cards.append(self.shoe.nextCard())
-                elif ut.canDoubleDown(hand) and seat.player.wantsToDoubleDown(hand) and seat.player.bank >= hand.bet:
+                elif ut.canDoubleDown(hand) and seat.player.wantsToDoubleDown(hand) and seat.player.bank >= 2*hand.bet:
                     seat.player.roundBetting += hand.bet
                     hand.doubleDown(self.shoe)
                 # Special actions have been delt with, now play normally

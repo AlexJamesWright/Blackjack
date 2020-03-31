@@ -273,12 +273,12 @@ class Counter(BasicStrategist):
 
     __name__ = "Counter"
 
-    def __init__(self, bank=1000, mult=5):
+    def __init__(self, bank=1000, mult=7):
         super().__init__(bank)
         self.mult = mult
 
     def getBet(self):
-        return min(max(int(self.broadcast.trueHiLoCount() - 2) * self.mult * 80, 80), 3*self.mult*80)
+        return max((self.broadcast.trueHiLoCount() - 2) * self.mult * 80, 10)
 
 
 
