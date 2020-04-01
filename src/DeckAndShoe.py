@@ -44,9 +44,7 @@ class Shoe(object):
         self.broadcast.numberOfDecks = numberOfDecks
         for i in range(numberOfDecks):
             self.decks.append(Deck())
-            random.shuffle(self.decks[i].cards)
             self.cards += self.decks[i].cards
-            random.shuffle(self.cards)
             
         random.shuffle(self.cards)
         

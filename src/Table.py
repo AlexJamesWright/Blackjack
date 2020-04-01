@@ -68,12 +68,12 @@ class Table(object):
                 # Start of hand, deal with doubling and splitting firest
                 if len(hand.cards) == 1:
                     # Player must have split so take another card
-                    hand.cards.append(self.shoe.nextCard())
+                    hand.addCard(self.shoe.nextCard())
                 elif len(seat.hands) == 1 and ut.canSplit(hand) and seat.player.wantsToSplit(hand) and seat.player.bank >= 2*hand.bet:
                     seat.newBet(hand.bet)
-                    seat.hands[1].cards.append(hand.cards[1])
+                    seat.hands[1].addCard(hand.cards[1])
                     hand.cards.remove(hand.cards[1])
-                    hand.cards.append(self.shoe.nextCard())
+                    hand.addCard(self.shoe.nextCard())
                 elif ut.canDoubleDown(hand) and seat.player.wantsToDoubleDown(hand) and seat.player.bank >= 2*hand.bet:
                     seat.player.roundBetting += hand.bet
                     hand.doubleDown(self.shoe)
@@ -170,8 +170,9 @@ class Table(object):
         """
         for seat in self.seats:
             for hand in seat.hands:
+                tot = ut.getTotal(hand)
                 # Only pay out if player isnt bust
-                if ut.isNotBust(hand):
+                if tot <= 21:
                     # Recall that bet has already been taken, so payouts must
                     # include this again. I.e. a push requires bank+=bet
 
@@ -182,10 +183,10 @@ class Table(object):
                     elif ut.isBust(self.dealer.hand):
                         seat.player.payout += hand.bet*2
                     # Pay out if higher score than dealer
-                    elif ut.getTotal(hand) > self.dealer.fullTotal():
+                    elif tot > self.dealer.fullTotal():
                         seat.player.payout += hand.bet*2
                     # Push, give bet back
-                    elif ut.getTotal(hand) == self.dealer.fullTotal():
+                    elif tot == self.dealer.fullTotal():
                         seat.player.payout += hand.bet
 
         for player in self.getPlayers():

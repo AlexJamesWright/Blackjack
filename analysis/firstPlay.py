@@ -13,16 +13,19 @@ from Players import Sticker, BasicStrategist, Counter
 from matplotlib import pyplot as plt
 import numpy as np
 from time import time
+import seaborn as sns
+sns.set()
 
 if __name__ == '__main__':
 
-    plt.figure()
-
+    fig = plt.figure()
+    fig.set_size_inches(8, 6)
+    
     # Colours for plotting
     colours = ['blue', 'green', 'red', 'orange', 'brown', 'pink']
 
     # How many times to run the experiment
-    Nrealisations = 100
+    Nrealisations = 80
 
     # How many shoes to play in each experiment
     Nshoes = 400
@@ -88,8 +91,10 @@ if __name__ == '__main__':
     plt.xlabel(r'$Round$')
     plt.ylim(0, 1.2*np.max(mean[:minRounds]))
     plt.xlim(0, minRounds)
-    plt.legend(loc='upper left')
+    plt.legend(loc='lower left')
     plt.show()
 
     for i, player in enumerate(playerClasses):
         print(f"{player.__name__:20s}: mean bank = {playersMeans[i][minRounds-1]:.2f}")
+
+

@@ -157,7 +157,7 @@ class Risker(Player):
     __name__ = 'Risker'
 
     def wantsToHit(self, hand):
-        if ut.getTotal(hand) < 19:
+        if hand.total < 19:
             return True
         return False
 
@@ -165,7 +165,7 @@ class Risker(Player):
         return True
 
     def wantsToDoubleDown(self, hand):
-        if ut.getTotal(hand) < 12:
+        if hand.tot < 12:
             return True
         return False
 
@@ -278,7 +278,7 @@ class Counter(BasicStrategist):
         self.mult = mult
 
     def getBet(self):
-        return max((self.broadcast.trueHiLoCount() - 2) * self.mult * 80, 10)
+        return max((self.broadcast.trueHiLoCount() - 2) * self.mult * 80, 80)
 
 
 

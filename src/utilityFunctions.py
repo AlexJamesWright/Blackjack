@@ -42,13 +42,12 @@ def getNumber(card):
         The value of the card
     """
     num = card[:-1]
-    try:
+    if num == 'A':
+        return 11 
+    elif num == 'J' or num == 'Q' or num == 'K':
+        return 10
+    else:
         return int(num)
-    except ValueError:
-        if num == 'A':
-            return 11
-        else:
-            return 10
 
 def getTotal(hand):
     """
